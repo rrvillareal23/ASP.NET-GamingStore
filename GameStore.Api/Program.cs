@@ -1,5 +1,4 @@
 using GameStore.Api.Entities;
-
 const string GetGameEndPointName = "GetGame";
 
 List<Game> games = new()
@@ -40,11 +39,14 @@ List<Game> games = new()
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
+var group = app.MapGroup("/games")
+    .WithParameterValidation();
+
 //get all games
-app.MapGet("/games", () => games);
+group.MapGet("/", () => games);
 
 //get game with specific Id
-app.MapGet("/games/{id}", (int id) => 
+group.MapGet("/{id}", (int id) => 
 {
     Game? game = games.Find(game => game.Id == id);
 
@@ -57,12 +59,46 @@ app.MapGet("/games/{id}", (int id) =>
 })
 .WithName(GetGameEndPointName);
 
-app.MapPost("/games", (Game game) =>
+//add game
+group.MapPost("/", (Game game) =>
 {
     game.Id = games.Max(game => game.Id) +1;
     games.Add(game);
     
     return Results.CreatedAtRoute(GetGameEndPointName, new {id=game.Id}, game);
+});
+
+//update game
+group.MapPut("/{id}", (int id, Game updatedGame) =>
+{
+    Game? existingGame = games.Find(game => game.Id == id);
+
+    if (existingGame is null)
+    {
+        return Results.NotFound();
+    }
+
+    existingGame.Name = updatedGame.Name;
+    existingGame.Genre = updatedGame.Genre;
+    existingGame.Price = updatedGame.Price;
+    existingGame.ReleaseDate = updatedGame.ReleaseDate;
+    existingGame.ImageUri = updatedGame.ImageUri;
+
+    return Results.NoContent();
+    
+});
+
+//delete game
+group.MapDelete("/{id}", (int id) =>
+{
+    Game? game = games.Find(game => game.Id == id);
+
+    if (game is not null)
+    {
+        games.Remove(game);
+    }
+
+    return Results.NoContent();
 });
 
 app.Run();
