@@ -15,7 +15,7 @@ public static class GamesEndpoints
                         .WithParameterValidation();
 
         //get all games
-        group.MapGet("/", () => repository.GetAll);
+        group.MapGet("/", () => repository.GetAll());
 
         //get game with specific Id
         group.MapGet("/{id}", (int id) =>
