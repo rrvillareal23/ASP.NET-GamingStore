@@ -7,7 +7,7 @@ public class InMemGamesRepository : IGamesRepository
     {
         new Game()
         {
-            Id=1,
+            Id = 1,
             Name="Street Fighter II",
             Genre="Fighting",
             Price=19.99M,
